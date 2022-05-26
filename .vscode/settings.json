@@ -1,0 +1,8 @@
+{
+    "terminal.integrated.enablePersistentSessions": true,
+    "eslint.alwaysShowStatus": true,
+    "eslint.debug": true,
+    "eslint.format.enable": true,
+    "eslint.run": "onSave",
+    "editor.formatOnSave": true
+}

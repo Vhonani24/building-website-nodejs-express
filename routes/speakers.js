@@ -1,28 +1,40 @@
-const express = require("express");
-//const SpeakerService = require("../services/SpeakerService");
+const express = require('express');
 
 const router = express.Router();
 
 module.exports = params => {
-    const { speakersService } = params;
-    
-    router.get("/", async(req, res) => {
+  const { speakersService } = params;
 
-        const speakers = await speakersService.getList();
-    
-        res.render('layout', { pageTitle: "Speakers", template: 'speakers', speakers });
+  router.get('/', async (request, response, next) => {
+    try{
+
+      const speakers = await speakersService.getList();
+      const artwork = await speakersService.getAllArtwork();
+      return response.render('layout', { pageTitle: 'Speakers', template: 'speakers', speakers, artwork });
+
+    } catch(err){
+      return next(err);
+    }
+   
+  });
+
+  router.get('/:shortname', async (request, response, next) => {
+    try{
+      const artwork = await speakersService.getArtworkForSpeaker(request.params.shortname);
+      console.log(artwork);
+     return response.render('layout', {
+        pageTitle: 'Speakers',
+        template: 'speakers-detail',
+        speaker,
+        artwork,
       });
-    
-    router.get('/:shortname', async(req, res) => {
-        
-        const speaker = await speakersService.getSpeaker(req.params.shortname);
-        console.log(speaker);
 
-        res.render('layout', { pageTitle: "Speakers", template: 'speakers-detail', speaker });
-        
-    
-    });
-    
-    return router;
+    }catch(error){
+      return next(error);
+    }
+    const speaker = await speakersService.getSpeaker(request.params.shortname);
+   
+  });
 
+  return router;
 };

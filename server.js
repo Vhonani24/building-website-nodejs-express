@@ -4,6 +4,10 @@ const path = require('path');
 
 const cookieSession = require('cookie-session');
 
+const createError = require('http-errors');
+
+const bodyParser = require('body-parser');
+
 const FeedbackService = require('./services/FeedbackService');
 
 const SpeakersService = require('./services/SpeakerService');
@@ -16,8 +20,6 @@ const routes = require('./routes');
 
 const app = express();
 
-
-
 app.set('trust proxy', 1);
 
 app.use(cookieSession({
@@ -25,6 +27,8 @@ app.use(cookieSession({
     keys: ['Ghdur687399s7w'],
 
 }));
+
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
@@ -34,26 +38,46 @@ app.locals.siteName = 'ROUX Meetups';
 
 app.use(express.static(path.join(__dirname, "./static")));
 
-app.use(async(req, res, next) => {
+app.use(bodyParser.urlencoded({ extended: true }));
 
-    try{
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, './views'));
 
-        const names = await speakersService.getNames();
+app.locals.siteName = 'ROUX Meetups';
 
-        res.locals.speakerNames = names;
-        return next();
+app.use(express.static(path.join(__dirname, './static')));
 
-    }catch(err){
-        return next(err);
-
-    }
-
+app.use(async (request, response, next) => {
+  try {
+    const names = await speakersService.getNames();
+    response.locals.speakerNames = names;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 });
 
-app.use('/', routes({
+app.use(
+  '/',
+  routes({
     feedbackService,
-    speakersService
-}));
+    speakersService,
+  })
+);
+
+app.use((request, response, next) => {
+  return next(createError(404, 'File not found'));
+});
+
+app.use((err, request, response, next) => {
+  response.locals.message = err.message;
+  console.error(err);
+  const status = err.status || 500;
+  response.locals.status = status;
+  response.status(status);
+  response.render('error');
+});
+  
 
 const port = process.env.PORT || 3000;
     app.listen(port, () => {

@@ -27,7 +27,12 @@
             Speakers
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/speakers">All Speakers</a>
+            <a class="dropdown-item" href="/speakers"
+            onclick="dataLayer.push({
+              'event': 'pageview',
+              //'boo': 'Cien años de soledad',
+              //'bookAuthor': 'Gabriel García Márquez'
+          });">All Speakers</a>
             <div class="dropdown-divider"></div>
 
             <% speakerNames.forEach(function (speaker) {%>
